@@ -1,13 +1,14 @@
 <html>
     <head>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.37/Tone.js" integrity="sha512-gK8OnTXn8cTYkHqYX+bhzjQ1rClAPuG2eMy+oRuV26mSuE0EbZeULFKdyc/YGX1Z/JsC06FXxQttdX4aahjSMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <title>autopong</title>
     </head>
     <body>
         <button id="start">start</button>
         <button id="stop">stop</button>
         <div class="slidecontainer">
-          <input type="range" min="1" max="800" value="3" class="slider" id="rango">
-          <input type="range" min="1" max="800" value="3" class="slider" id="rango2">
+          <input type="range" min="1" max="500" value="3" class="slider" id="rango">
+          <input type="range" min="1" max="500" value="3" class="slider" id="rango2">
         </div>
         <canvas id="circulo" width=700 height=700></canvas>
         <script>
@@ -19,12 +20,21 @@
             let interval;
             let i = 10;
             let x, y, dx, dy;
+            let bgColors = ["rgba(200,50,200,.03)", "rgba(20,250,200,.03)", "rgba(20,50,10,.03)", "rgba(230,150,20,.03)", "rgba(50,50,200,.03)"]
+            let bgColorIndex = 0
+            let synthNotes = ["C", "D", "A"]
+            let synthNoteIndex = 0
+
             function init(){
-                dx=5; dy=5;
-                x=Math.random()*canvas.offsetWidth; y=Math.random()*100;
+                dx = 5 - (Math.random() * 10)
+                dy = 5 - (Math.random() * 10)
+                //solo por seguridad que tenga un valor operable
+                if (dx<1 && dx>-1) dx=1
+                if (dy<1 && dy>-1) dy=1
+                x=Math.random()*canvas.offsetWidth; y=Math.random()*100
             }
             function draw() {
-                ctx.fillStyle = "rgba(200,50,200,.03)";
+                ctx.fillStyle = bgColors[bgColorIndex]
                 if (i % 100 < 0.5) ctx.fillRect(0, 0, canvas.width, canvas.height); 
 
                 ctx.fillStyle = `rgba(${variable2/5},100,${variable/10},0.9)`;
@@ -32,16 +42,31 @@
                 sh = (variable2/14) + 3 
                 x += dx
                 y += dy
-                if (x+sw > canvas.offsetWidth || x < 0) dx *= -1;
-                if (y+sh > canvas.offsetHeight || y < 0) dy *= -1;
+                
+                if (x+sw > canvas.offsetWidth || x < 0) { 
+                    dx *= -1
+                    bgColorIndex++
+                    synthNoteIndex++
+                }
+                if (y+sh > canvas.offsetHeight || y < 0) {
+                    dy *= -1
+                    bgColorIndex++
+                    synthNoteIndex++
+                }
+                if (bgColorIndex >= bgColors.length) bgColorIndex=0
+                if (synthNoteIndex >= synthNotes.length) synthNoteIndex=0
+                
                 ctx.fillRect(x, y, sw, sh)
 
-                let newValue = "D"+(variable2/50).toString();
-                osc.frequency.rampTo(newValue,.4);
-                osc.phase = i+variable;
+                const newNote = `${synthNotes[synthNoteIndex]}${variable2/100}`
+                // osc.frequency.rampTo(newValue,.4);
+                // osc.phase = i+variable;
 
-                console.log("starting with ", newValue);
-                osc.start();
+                // if (i % (variable2/50) < 0.5) synth.triggerAttackRelease(`${synthNotes[synthNoteIndex]}${variable2/100}`, variable/50);
+                if (i % 100 < 0.5) synth.triggerAttackRelease(newNote, variable/50);
+
+                console.log("starting with ", newNote);
+                // osc.start();
                 i = i+10;
             }
 
@@ -63,6 +88,8 @@
             }, 1000)
 
             const osc = new Tone.Oscillator("D4").toDestination();//.start().toDestination();
+            const synth = new Tone.MembraneSynth().toDestination();
+
 
             document.getElementById('start')?.addEventListener('click', async () => {init(); interval = setInterval(draw,100);} )
             document.getElementById('stop')?.addEventListener('click', async () => {osc.stop(0); clearInterval(interval);} )
