@@ -9,37 +9,52 @@
             }
             button {
                 font-size: large;
-
+            }
+            canvas {
+                border: double royalblue;
+            }
+            .controls {
+                width: 700px;
+                align-items: center;
+                margin-left: 27%;
+                border: double royalblue;
+                padding-top: 10px;
             }
         </style>
     </head>
     <body style="background-color:steelblue">
         <div style="text-align: center;">
-            <button id="start">∔↬</button>
-            <button id="stop" disabled>◌⠃</button>
-            <div class="slidecontainer">
-            🝒 <input type="range" min="1" max="500" value="3" class="slider" id="rango" disabled>
-            ⯔ <input type="range" min="1" max="500" value="3" class="slider" id="rango2" disabled>
-            ⎑ <input type="range" min="1" max="5000" value="1000" class="slider" id="rango3">
-            ⯟ <input type="range" min="1" max="1000" value="4" class="slider" id="rango4" disabled>
+            <div class="controls">
+                <button id="start">∔↬</button>
+                <button id="stop" disabled>◌⠃</button>
+                <div class="slidecontainer">
+                    🝒 <input type="range" min="1" max="500" value="3" class="slider" id="rango" disabled>
+                    ⯔ <input type="range" min="1" max="500" value="3" class="slider" id="rango2" disabled>
+                    ⎑ <input type="range" min="1" max="5000" value="1000" class="slider" id="rango3">
+                    ⯟ <input type="range" min="1" max="1000" value="4" class="slider" id="rango4" disabled>
+                </div>
             </div>
-            <canvas id="circulo" width=700 height=700></canvas>
+            <br>
+            <canvas id="circulo" width=700 height=600></canvas>
         </div>
         <script>
             let variable=100;
             let variable2=100;
             let variable3=1000;
             let note;
+
             let canvas = document.getElementById("circulo")
             let ctx = canvas.getContext("2d")
             const SCALE = 2
             ctx.scale(SCALE, SCALE)
             const W = canvas.offsetWidth / SCALE
             const H = canvas.offsetHeight / SCALE
+            // ctx.globalCompositeOperation = "lighter"
+
             let interval;
             let i = 10;
             let x, y, dx, dy;
-            let bgColors = ["rgba(200,50,200,.03)", "rgba(20,250,200,.03)", "rgba(20,50,10,.03)", "rgba(230,150,20,.03)", "rgba(50,50,200,.03)"]
+            let bgColors = ["rgba(200,50,200, 0.03)", "rgba(20,250,200, 0.03)", "rgba(20,250,10, 0.03)", "rgba(230,150,20, 0.03)", "rgba(50,50,200, 0.03)", "rgba(250, 200, 200, 0.03)"]
             let bgColorIndex = 0
             let synthNotes = ["F", "D", "A"]
             let synthChords = [ ["C", "E", "G"] , ["F", "D", "A"], ["C","D","G"], ["C", "E", "D"] ]
@@ -72,7 +87,7 @@
                                        `${synthChords[synthNoteIndex][2]}${variable2/120}`]
 
                     psynth.triggerAttackRelease(newChord, variable/50);
-                    console.log(newChord)
+                    // console.log(newChord)
                 }, variable3)
             }
 
@@ -81,7 +96,8 @@
                 variable4 = slider.value
                 chorusLfoFreq = variable4
 
-                bgColorIndex++
+                // bgColorIndex++
+                bgColorIndex = Math.floor(Math.random() * bgColors.length-1)
                 synthNoteIndex++
 
                 chorus.depth     = Math.random()*0.9
@@ -93,10 +109,12 @@
             }
 
             function draw() {
-                ctx.fillStyle = bgColors[bgColorIndex]
-                if (i % 10 < 0.5) ctx.fillRect(0, 0, canvas.width, canvas.height); 
+                i++;
 
-                ctx.fillStyle = `rgba(${variable2/5},100,${variable/10},0.9)`;
+                ctx.fillStyle = bgColors[bgColorIndex]
+                if (i % 2 < 1)  ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+                ctx.fillStyle = `rgba(${variable2/2},180,${variable/5},0.9)`;
                 sw = (variable/14) + 3
                 sh = (variable2/14) + 3 
                 x += dx
@@ -116,8 +134,6 @@
                 const dvd = String.fromCharCode(11799 + (Math.random() * i%12))
                 // const dvd = String.fromCharCode(9791 + (Math.random() * 4))
                 ctx.strokeText(dvd, x, y)
-                
-                i++
             }
 
             var slider = document.getElementById("rango");
@@ -161,6 +177,17 @@
                 startBtn.disabled = false
                 stopBtn.disabled = true
             } )
+
+            // // https://www.telerik.com/blogs/how-do-i-pause-execution-in-javascript
+            // function pause(numberMillis) { 
+            //     var now = new Date(); 
+            //     var exitTime = now.getTime() + numberMillis; 
+            //     while (true) { 
+            //         now = new Date(); 
+            //         if (now.getTime() > exitTime) 
+            //             return; 
+            //     } 
+            // } 
         </script>
     </body>
 </html>
