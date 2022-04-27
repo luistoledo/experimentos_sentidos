@@ -1,3 +1,4 @@
+
 <html>
     <head>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.37/Tone.js" integrity="sha512-gK8OnTXn8cTYkHqYX+bhzjQ1rClAPuG2eMy+oRuV26mSuE0EbZeULFKdyc/YGX1Z/JsC06FXxQttdX4aahjSMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -9,52 +10,37 @@
             }
             button {
                 font-size: large;
-            }
-            canvas {
-                border: double royalblue;
-            }
-            .controls {
-                width: 700px;
-                align-items: center;
-                margin-left: 27%;
-                border: double royalblue;
-                padding-top: 10px;
+
             }
         </style>
     </head>
     <body style="background-color:steelblue">
         <div style="text-align: center;">
-            <div class="controls">
-                <button id="start">∔↬</button>
-                <button id="stop" disabled>◌⠃</button>
-                <div class="slidecontainer">
-                    🝒 <input type="range" min="1" max="500" value="3" class="slider" id="rango" disabled>
-                    ⯔ <input type="range" min="1" max="500" value="3" class="slider" id="rango2" disabled>
-                    ⎑ <input type="range" min="1" max="5000" value="1000" class="slider" id="rango3">
-                    ⯟ <input type="range" min="1" max="1000" value="4" class="slider" id="rango4" disabled>
-                </div>
+            <button id="start">∔↬</button>
+            <button id="stop" disabled>◌⠃</button>
+            <div class="slidecontainer">
+            🝒 <input type="range" min="1" max="500" value="3" class="slider" id="rango" disabled>
+            ⯔ <input type="range" min="1" max="500" value="3" class="slider" id="rango2" disabled>
+            ⎑ <input type="range" min="1" max="5000" value="1000" class="slider" id="rango3">
+            ⯟ <input type="range" min="1" max="1000" value="4" class="slider" id="rango4" disabled>
             </div>
-            <br>
-            <canvas id="circulo" width=700 height=600></canvas>
+            <canvas id="circulo" width=700 height=700></canvas>
         </div>
         <script>
             let variable=100;
             let variable2=100;
             let variable3=1000;
             let note;
-
             let canvas = document.getElementById("circulo")
             let ctx = canvas.getContext("2d")
             const SCALE = 2
             ctx.scale(SCALE, SCALE)
             const W = canvas.offsetWidth / SCALE
             const H = canvas.offsetHeight / SCALE
-            // ctx.globalCompositeOperation = "lighter"
-
             let interval;
             let i = 10;
             let x, y, dx, dy;
-            let bgColors = ["rgba(200,50,200, 0.03)", "rgba(20,250,200, 0.03)", "rgba(20,250,10, 0.03)", "rgba(230,150,20, 0.03)", "rgba(50,50,200, 0.03)", "rgba(250, 200, 200, 0.03)"]
+            let bgColors = ["rgba(200,50,200,.03)", "rgba(20,250,200,.03)", "rgba(20,50,10,.03)", "rgba(230,150,20,.03)", "rgba(50,50,200,.03)"]
             let bgColorIndex = 0
             let synthNotes = ["F", "D", "A"]
             let synthChords = [ ["C", "E", "G"] , ["F", "D", "A"], ["C","D","G"], ["C", "E", "D"] ]
@@ -62,7 +48,7 @@
             let chorusLfoFreq = 0
             let automata = null //interval para automatización del todo
 
-            function init(){
+            function init(){             
                 dx = 5 - (Math.random() * 10)
                 dy = 5 - (Math.random() * 10)
                 //solo por seguridad que tenga un valor operable
@@ -87,7 +73,7 @@
                                        `${synthChords[synthNoteIndex][2]}${variable2/120}`]
 
                     psynth.triggerAttackRelease(newChord, variable/50);
-                    // console.log(newChord)
+                    console.log(newChord)
                 }, variable3)
             }
 
@@ -96,8 +82,7 @@
                 variable4 = slider.value
                 chorusLfoFreq = variable4
 
-                // bgColorIndex++
-                bgColorIndex = Math.floor(Math.random() * bgColors.length-1)
+                bgColorIndex++
                 synthNoteIndex++
 
                 chorus.depth     = Math.random()*0.9
@@ -109,12 +94,13 @@
             }
 
             function draw() {
-                i++;
-
+                i++
                 ctx.fillStyle = bgColors[bgColorIndex]
-                if (i % 2 < 1)  ctx.fillRect(0, 0, canvas.width, canvas.height)
+                if (i % 10 < 0.5) ctx.fillRect(0, 0, canvas.width, canvas.height); 
+              
+                if (i % (500-(variable3/510)) < 1) return
 
-                ctx.fillStyle = `rgba(${variable2/2},180,${variable/5},0.9)`;
+                ctx.fillStyle = `rgba(${variable2/5},100,${variable/10},0.9)`;
                 sw = (variable/14) + 3
                 sh = (variable2/14) + 3 
                 x += dx
@@ -163,7 +149,7 @@
             const startBtn = document.getElementById('start')
             startBtn.addEventListener('click', async () => {
                 init()
-                interval = setInterval(draw,100)
+                interval = setInterval(draw, 100)
                 slider3.disabled = true
                 startBtn.disabled = true
                 stopBtn.disabled = false
@@ -177,17 +163,6 @@
                 startBtn.disabled = false
                 stopBtn.disabled = true
             } )
-
-            // // https://www.telerik.com/blogs/how-do-i-pause-execution-in-javascript
-            // function pause(numberMillis) { 
-            //     var now = new Date(); 
-            //     var exitTime = now.getTime() + numberMillis; 
-            //     while (true) { 
-            //         now = new Date(); 
-            //         if (now.getTime() > exitTime) 
-            //             return; 
-            //     } 
-            // } 
         </script>
     </body>
 </html>
