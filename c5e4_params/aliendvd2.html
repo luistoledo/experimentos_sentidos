@@ -39,15 +39,20 @@
         <div class="slidecontainer">
             🝒 <input type="range" min="1" max="500" value="3" class="slider" id="rango" disabled>
             ⯔ <input type="range" min="1" max="500" value="3" class="slider" id="rango2" disabled>
-            ⎑ <input type="range" min="1" max="2500" value="2000" class="slider" id="rango3">
+            ⎑ <input type="range" min="1000" max="8000" value="4000" class="slider" id="rango3">
             ⯟ <input type="range" min="1" max="1000" value="4" class="slider" id="rango4" disabled>
             🜅
         </div>
         <!-- </div> -->
         <br>
-        <canvas id="canvas" width=700 height=600></canvas>
+        <canvas id="canvas" width=600 height=600></canvas>
     </div>
+
+    
     <script>
+        // TODO: que la vel de los walkers sea proporcional al beat
+        
+        
         let variable = 100;
         let variable2 = 100;
         let variable3 = 1000;
@@ -69,11 +74,11 @@
         let bgColorIndex = 0
         let synthNotes = ["F", "D", "A"]
         let synthChords = [
-            ["C", "E", "G"],
-            ["F", "Ab", "A"],
-            ["C", "D", "G"],
-            ["C", "E", "D"],
-            ["Ab", "C", "F"]
+            ["D", "Fb", "Ab"],
+            ["E", "Gb", "E2"],
+            ["E", "G", "Fb"],
+            ["A", "C", "E"],
+            ["A", "C", "Db"]
         ]
         let synthNoteIndex = 0
         let chorusLfoFreq = 0
@@ -85,8 +90,8 @@
             //solo por seguridad que tenga un valor operable
             if (dx < 2 && dx > -2) dx = 2
             if (dy < 2 && dy > -2) dy = 2
-            x = Math.random() * W
-            y = Math.random() * 100
+            x = (W/2) + (W*Math.random()*W*4)
+            y = (H/2) + (H*Math.random()*H*4)
 
             // rythm interval for automate slider change, and to play musak
             automata = setInterval(() => {
@@ -99,17 +104,45 @@
                 synthNoteIndex++
                 if (synthNoteIndex >= synthNotes.length) synthNoteIndex = 0
 
-                const newNote = `${synthNotes[synthNoteIndex]}${variable2/120}`
-                const newChord = [`${synthChords[synthNoteIndex][0]}${variable2/180}`,
-                    `${synthChords[synthNoteIndex][1]}${variable2/160}`,
-                    `${synthChords[synthNoteIndex][2]}${variable2/120}`
+                // var2  va de 1 a 500
+                // scale va de 1 a 4
+                const newNote  = `${synthNotes[synthNoteIndex]}${variable2/120}`
+                const newChord = [`${synthChords[synthNoteIndex][0]}${map(variable2,1,500,1,3)}`,
+                                  `${synthChords[synthNoteIndex][1]}${map(variable2,1,500,1,3)}`,
+                                  `${synthChords[synthNoteIndex][2]}${map(variable2,1,500,1,3)}`
                 ]
 
                 // psynth.triggerAttackRelease(newChord, variable / 50)
                 // psynth.triggerAttack(newChord, 2)
                 // psynth.triggerRelease(variable / 800)
 
-                psynth.triggerAttackRelease(newChord, [1, variable / 200, variable4/500])
+                // psynth.triggerAttackRelease(newChord[0], 0.5, Tone.now())
+                // psynth.triggerAttackRelease(newChord[1], 0.5, 2)
+                // psynth.triggerAttackRelease(newChord[2], 0.5, 4)
+
+
+                synth0.triggerAttackRelease(newChord[0], 2.5, Tone.now() )
+                synth1.triggerAttackRelease(newChord[1], 1.5, Tone.now() *map(variable3,1000,8000,0.5,1.5))
+                synth2.triggerAttackRelease(newChord[2], 1, Tone.now() *map(variable3,1000,8000,1.5,2.5))
+                // 
+                // time    [ 0.5 | 1.0 | 1.5 | 2.0 | 2.1 ]
+                // dur c-0    x     x     x
+                // dur c-1          x     x     x
+                // dur c-2                x     x     x
+
+                // synth0.triggerAttack(newChord[0], Tone.now())
+                // synth0.triggerAttack(newChord[1], "+1")
+                // synth0.triggerAttack(newChord[2], "+2")
+
+                // synth1.triggerAttackRelease("D4", 1, )
+                // synth2.triggerAttackRelease("D4", 1, 2)
+                // synth.triggerAttackRelease(["E4"], 1, 4)
+
+                console.log('tap')
+                
+                // psynth.triggerAttack(newChord[1], 0.5, 0.2)
+                // psynth.triggerAttackRelease(newChord[2], 2 , 3)
+                // psynth.triggerAttackRelease(newChord, [0.1, variable / 200, variable4/500])
 
                 ctx.fillStyle = "rgba(200,200,200,1)"
                 ctx.strokeRect(x,y,5,5)
@@ -117,6 +150,8 @@
         }
 
         function windChanged() {
+            dx *= -1
+
             slider4.value = Math.random() * 1000
             variable4 = slider.value
             chorusLfoFreq = variable4/10
@@ -133,6 +168,39 @@
             if (synthNoteIndex >= synthNotes.length) synthNoteIndex = 0
 
             // psynth.releaseAll()
+            
+            // slider var3     va de 1000 a 8000
+            // rango para dx iria de 10 a 1
+            v3m = map(variable3, 1000, 8000, 10, 1)
+            dx = v3m - (Math.random() * v3m*2)
+            dy = v3m - (Math.random() * v3m*2)
+            // dy = 10 - (Math.random() * 20)
+            //solo por seguridad que tenga un valor operable
+            if (dx < 1 && dx > -1) dx = 1.3
+            if (dy < 1 && dy > -1) dy = 1.3
+
+            // por si se pierde
+            if (Math.abs(x) > W*2) x=W/2
+            if (Math.abs(y) > H*2) y=H/2
+        }
+
+        // from https://github.com/processing/p5.js/blob/b7815320e5e51a005fcc5a71cb0c9bf10553a008/src/math/calculation.js
+        function map(n, start1, stop1, start2, stop2, withinBounds) {
+            // p5._validateParameters('map', arguments);
+            const newval = (n - start1) / (stop1 - start1) * (stop2 - start2) + start2;
+            if (!withinBounds) {
+                return newval;
+            }
+            if (start2 < stop2) {
+                return this.constrain(newval, start2, stop2);
+            } else {
+                return this.constrain(newval, stop2, start2);
+            }
+        }
+
+        function constrain (n, low, high) {
+            p5._validateParameters('constrain', arguments);
+            return Math.max(Math.min(n, high), low);
         }
 
         function draw() {
@@ -143,18 +211,17 @@
 
             sw = (variable / 14) + 3
             sh = (variable2 / 14) + 3
-            x += dx
+            xt = 1
+            // xt = Math.min(1, Math.abs(Math.tan(i/(variable2/5))))
+            xt = Math.cos(i/(variable2/25))
+            x += dx * xt
             y += dy
 
             // x += variable/10 * Math.sin(i%(Math.PI*2))
             // x += Math.cos(i%(Math.PI*2))
             // x += Math.cos(i%(Math.PI))
 
-            if (x + (sw/2) > W || x - (sw / 2) < 0) {
-                dx *= -1
-                windChanged()
-            }
-            if (y + (sh/2) > H || y - (sh / 2) < 0) {
+            if (x + (sw/2) > W || x - (sw / 2) < 0 || y + (sh/2) > H || y - (sh / 2) < 0) {
                 dy *= -1
                 windChanged()
             }
@@ -169,6 +236,8 @@
             ctx.strokeText(dvd, y, x)
             ctx.strokeText(dvd, W-x, H-y)
             ctx.strokeText(dvd, H-y, W-x)
+            ctx.strokeText(dvd, H-x, y)
+            ctx.strokeText(dvd, W-y, x)
             ctx.strokeText(dvd, x, H-y)
             ctx.strokeText(dvd, y, W-x)
         }
@@ -193,13 +262,39 @@
 
         // const osc = new Tone.Oscillator("D4").toDestination();//.start().toDestination();
         const synth = new Tone.MembraneSynth().toDestination()
-        const chorus = new Tone.Chorus(4, 2.5, 0.5).toDestination().start()
-        const psynth = new Tone.PolySynth().connect(chorus)
-        // psynth.volume.value = -5
-        psynth.options.envelope.attack = 0.8
-        psynth.options.envelope.decay = 0.8
-        psynth.options.envelope.release = 0.6
+        const synth0 = new Tone.Synth().toDestination()
+        const synth1 = new Tone.Synth().toDestination()
+        const synth2 = new Tone.Synth().toDestination()
+
+        const chorus  = new Tone.Chorus(10, 2.5, 5).toDestination().start()
+        const chorust = new Tone.Chorus(2, 10, 1, 1).toDestination().start()
+        const distortion = new Tone.Distortion(0.9)//.start()
+        // const psynth = new Tone.PolySynth().connect(chorus)
+        // const psynth = new Tone.PolySynth().toDestination()
+        
+        // psynth.options.envelope.attack = 1
+        // psynth.options.envelope.decay = 0.1
+        // psynth.options.envelope.release = 0.6
+        // psynth.options.envelope.sustain = 0
+        
+        synth0.chain(distortion, chorust)
+        // synth1.chain(chorust)
+        // synth2.chain(chorust)
+        // synth1.connect(chorus)   
+        // synth2.connect(chorus)
+        // synth0.attackCurve = "sine"
+        // synth1.attackCurve = "sine"
+        // synth2.attackCurve = "sine"
+
+        const env = new Tone.AmplitudeEnvelope(0.5, 1, 0.4, 2);
+        synth0.envelope = env
+        synth1.envelope = env
+        synth2.envelope = env
+
+
+
         windChanged()
+        // psynth.volume.value = -5
 
         const startBtn = document.getElementById('start')
         startBtn.addEventListener('click', async () => {
@@ -212,7 +307,10 @@
         const stopBtn = document.getElementById('stop')
         stopBtn.addEventListener('click', async () => {
             // osc.stop(0)
-            psynth.releaseAll()
+            // psynth.releaseAll()
+            synth0.triggerRelease()
+            synth1.triggerRelease()
+            synth2.triggerRelease()
             clearInterval(interval)
             clearInterval(automata)
             slider3.disabled = false
