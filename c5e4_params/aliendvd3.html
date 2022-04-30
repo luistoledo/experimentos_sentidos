@@ -60,7 +60,7 @@
         <br>
         <canvas id="canvas" class="canvas_border" width=600 height=600></canvas>
         <br>
-        <a href="view-source:http:chief-stealth-adjustment.glitch.me/c5e4_params/aliendvd3.html">.⛶𑁊🮎∔</a>
+        <a target="_blank" href="https://glitch.com/edit/#!/chief-stealth-adjustment">.⛶𑁊🮎∔</a>
     </div>
 
     
@@ -94,7 +94,7 @@
             ["E", "Gb", "E2"],
             ["E", "G", "Fb"],
             ["A", "C", "E"],
-            ["A", "C", "Db"]
+            ["C", "E", "Db"]
         ]
         let synthNoteIndex = 0
         let chorusLfoFreq = 0
@@ -118,15 +118,6 @@
                                 `${synthChords[synthNoteIndex][2]}${map(variable2,1,500,1,3)}`
             ]
 
-            // psynth.triggerAttackRelease(newChord, variable / 50)
-            // psynth.triggerAttack(newChord, 2)
-            // psynth.triggerRelease(variable / 800)
-
-            // psynth.triggerAttackRelease(newChord[0], 0.5, Tone.now())
-            // psynth.triggerAttackRelease(newChord[1], 0.5, 2)
-            // psynth.triggerAttackRelease(newChord[2], 0.5, 4)
-
-
             synth0.triggerAttackRelease(newChord[0], 
                                         variable3 ,
                                         Tone.now() )
@@ -139,10 +130,6 @@
             // dur c-0   x    x     x     x    
             // dur c-1        x     x     x     x
             // dur c-2                x     x     x
-
-            // synth0.triggerAttack(newChord[0], Tone.now())
-            // synth0.triggerAttack(newChord[1], "+1")
-            // synth0.triggerAttack(newChord[2], "+2")
         }
 
 
@@ -273,37 +260,22 @@
         }
 
 
-        // const osc = new Tone.Oscillator("D4").toDestination();//.start().toDestination();
-        const synth = new Tone.MembraneSynth().toDestination()
+        // TODO: synth1 as membrane
+        // const synth1 = new Tone.MembraneSynth().toDestination()
         const synth0 = new Tone.Sampler({urls:{A1:"lead1.wav"}})
         const synth1 = new Tone.Sampler({urls:{A1:"lead2.wav"}})
-        const synth2 = new Tone.Sampler({urls:{A1:"lead1.wav", A2:"lead2.wav"}})
+        // const synth2 = new Tone.Sampler({urls:{A1:"lead1.wav", A2:"lead2.wav"}})
 
-        const chorus  = new Tone.Chorus(10, 2.5, 5).toDestination().start()
-        // const chorust = new Tone.Chorus(2*2/2, 0.4, 1, 1).toDestination().start()
+        const chorus  = new Tone.Chorus(2, 2.5, 1).toDestination().start()
         const distortion = new Tone.Distortion(0)//.start()
-        // const psynth = new Tone.PolySynth().connect(chorus)
-        // const psynth = new Tone.PolySynth().toDestination()
-        
-        // psynth.options.envelope.attack = 1
-        // psynth.options.envelope.decay = 0.1
-        // psynth.options.envelope.release = 0.6
-        // psynth.options.envelope.sustain = 0
-        
+
         synth0.chain(distortion, chorus)
         synth1.chain(distortion, chorus)
-        // synth1.chain(chorust)
-        // synth2.chain(chorust)
-        // synth1.connect(chorus)   
-        // synth2.connect(chorus)
-        // synth0.attackCurve = "sine"
-        // synth1.attackCurve = "sine"
-        // synth2.attackCurve = "sine"
 
         const env = new Tone.AmplitudeEnvelope(0, 1, 0.4, 1);
         synth0.envelope = env
         synth1.envelope = env
-        synth2.envelope = env
+        // synth2.envelope = env
 
 
 
@@ -325,7 +297,7 @@
             // psynth.releaseAll()
             synth0.triggerRelease()
             synth1.triggerRelease()
-            synth2.triggerRelease()
+            // synth2.triggerRelease()
             chorus.frequency.value = 0
             chorus.stop() // not sure which one is the correct one
             clearInterval(draw_interval)
@@ -338,7 +310,7 @@
             cleanerDirection = 1 // 1=to clean, 2=to paint 
             stop_timer = setInterval( ()=>{
                 console.log(canvas.style.opacity)
-                canvas.style.opacity -= 0.03 * cleanerDirection
+                canvas.style.opacity -= 0.1 * cleanerDirection
                 
                 if (canvas.style.opacity < 0) {
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -346,8 +318,9 @@
                 } else if (canvas.style.opacity > 1) {
                     clearInterval(stop_timer)
                     startBtn.disabled = false
+                    Tone.Transport.stop();
                 }
-            }, 50 )
+            }, 150 )
         })
 
     </script>
