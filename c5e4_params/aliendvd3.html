@@ -4,7 +4,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.37/Tone.js"
         integrity="sha512-gK8OnTXn8cTYkHqYX+bhzjQ1rClAPuG2eMy+oRuV26mSuE0EbZeULFKdyc/YGX1Z/JsC06FXxQttdX4aahjSMQ=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <title>aliendvd</title>
+    <title>yet another meditation machine</title>
+    <meta name="author" content="Luis Toledo | digitalcthulhu">
     <style>
         body {
             color: black;
@@ -102,7 +103,7 @@
         let synthChords = [
             ["D", "Fb", "Ab"],
             ["E", "Gb", "E2"],
-            ["G", "G", "Fb"],
+            ["G", "A", "Fb"],
             ["A", "C", "E"],
             ["C", "E", "Db"]
         ]
@@ -124,13 +125,13 @@
             // scale va de 1 a 4
             newNote  = `${synthNotes[synthNoteIndex]}${variable2/120}`
             newChord = [`${synthChords[synthNoteIndex][0]}${map(variable2,1,500, 0, 2)}`,
-                                `${synthChords[synthNoteIndex][1]}${map(variable2,1,500, 0.5, 1.5)}`,
+                                `${synthChords[synthNoteIndex][1]}${map(variable2,1,500, 0, 1.5)}`,
                                 `${synthChords[synthNoteIndex][2]}${map(variable2,1,500,1,3)}`
             ]
 
             // synth0.releaseAll()
 
-            synth0.triggerAttackRelease(newChord[0]) //, 
+            // synth0.triggerAttackRelease(newChord[0]) //, 
             //                             variable3/1000 , //duration in seconds
             //                             Tone.now())
             // synth1.triggerAttackRelease(newChord[1],
@@ -161,11 +162,11 @@
             }, variable3)
             beat()
 
-            beatPlayer.playbackRate = map(variable3,1000,10000,1,0.2)
+            beatPlayer.playbackRate = map(variable3,1000,10000,1,0.5)
             loop = new Tone.Loop((time) => {
                 // synth1.releaseAll(2)
                 beatPlayer.start(Tone.now(), "0", (variable3/1000) )
-                // synth1.triggerAttackRelease(newChord[1], (variable3/1000) - 0.1)
+                synth1.triggerAttackRelease(newChord[1], (variable3/1000) - 0.1, Tone.now())
                 // synth0.triggerAttackRelease(newChord[0], (variable3/1000) - 0.1)
                 console.log(time);
             }, variable3/1000).start(0);
@@ -179,7 +180,7 @@
             variable4 = slider.value
 
             // chorusLfoFreq = variable4/10 //og
-            chorusLfoFreq = map(variable4,1,1000,0,2.5  )
+            chorusLfoFreq = map(variable4,1,1000,0,1.3)
 
             bgColorIndex = Math.floor(Math.random() * bgColors.length - 1)
             synthNoteIndex++
@@ -294,7 +295,7 @@
         // TODO: synth1 as membrane
         // const synth1 = new Tone.MembraneSynth().toDestination()
         const synth0 = new Tone.Sampler({urls:{A1:"lead11.wav"}})
-        const synth1 = new Tone.Sampler({urls:{A1:"lead2.wav"}})
+        const synth1 = new Tone.Sampler({urls:{A0:"lead2.wav", A1:"lead11.wav"}})
         // const synth2 = new Tone.Sampler({urls:{A1:"lead1.wav", A2:"lead2.wav"}})
 
         const beatPlayer = new Tone.Player("beat1.wav")
@@ -303,17 +304,18 @@
         // const chorus  = new Tone.Chorus(2, 2.5, 1)  
         const chorus  = new Tone.Chorus(0,0,0).start()  
         const distortion = new Tone.Distortion(0.1).toDestination()
-        const reverb = new Tone.Reverb(1)
+        const reverb = new Tone.Reverb(1.5)
         const chorus2 = new Tone.Chorus(1, 2, .1).start()
-        const filter = new Tone.Filter(1500, "peaking").toDestination();
+        const filter = new Tone.Filter(1000, "peaking").toDestination();
 
-        chorus.wet.value=1
+        chorus.wet.value=1  
         reverb.wet.value=1
-        reverb.output.a.gain.value = 0.5
+        reverb.output.a.gain.value = 1
+        // filter.output.gain.value=2      
 
-        synth0.chain(chorus,  filter, Tone.Destination)
-        // synth1.chain(distortion)
-        synth1.chain(Tone.Destination)
+        // synth0.chain(chorus,  filter, Tone.Destination)
+        synth0.chain(Tone.Destination)
+        synth1.chain(chorus, reverb, filter, Tone.Destination)
         beatPlayer.chain(reverb, Tone.Destination)
 
         const env = new Tone.AmplitudeEnvelope(0.1, .8, .9, 1)
