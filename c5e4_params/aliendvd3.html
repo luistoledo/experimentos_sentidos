@@ -48,11 +48,14 @@
         }
 
         .everything {
+            padding-top: 10px;
             text-align: center;
-            position: absolute;
-            top: 50%;
-            transform: translate(-50%,-55%);
+            position: relative;
+            top: 10%;
+            /* transform: translate(-50%,0); */
+            transform: translate(-50%,-10%);
             left: 50%;
+            overflow: visible;
         }
     </style>
 </head>
@@ -96,7 +99,7 @@
         let i = 10;
         let x, y, dx, dy;
         let bgColors = ["rgba(200,50,200, 0.03)", "rgba(20,250,200, 0.03)", "rgba(20,250,10, 0.03)",
-            "rgba(230,150,20, 0.03)", "rgba(50,50,200, 0.03)", "rgba(250, 200, 200, 0.03)", "rgba(2,2,2,0.03)"
+            "rgba(230,150,20, 0.03)", "rgba(50,50,200, 0.03)", "rgba(200, 200, 200, 0.1)", "rgba(2,2,2,0.1)"
         ]
         let bgColorIndex = 0
         let synthNotes = ["F", "D", "A"]
@@ -111,6 +114,7 @@
         let chorusLfoFreq = 0
         // let beat_interval = null //interval para automatización del todo
 
+        // this code is a small mess. needs refactor now that i know what it should do
         function beat() {
             slider.value = Math.random() * 800
             slider2.value = Math.random() * 800
@@ -124,12 +128,13 @@
             // var2  va de 1 a 500
             // scale va de 1 a 4
             newNote  = `${synthNotes[synthNoteIndex]}${variable2/120}`
-            newChord = [`${synthChords[synthNoteIndex][0]}${map(variable2,1,500, 0, 2)}`,
-                                `${synthChords[synthNoteIndex][1]}${map(variable2,1,500, 0, 1.5)}`,
-                                `${synthChords[synthNoteIndex][2]}${map(variable2,1,500,1,3)}`
+            newChord = [`${synthChords[synthNoteIndex][0]}${map(variable2,slider2.min,slider2.max, 0, 2)}`,
+                                `${synthChords[synthNoteIndex][1]}${map(variable2,slider2.min,slider2.max, 0, 1.5)}`,
+                                `${synthChords[synthNoteIndex][2]}${map(variable2,slider2.min,slider2.max,1,3)}`
             ]
 
             // synth0.releaseAll()
+            // synth1.triggerAttackRelease(newChord[1], (variable3/1000) - 0.1, Tone.now())
 
             // synth0.triggerAttackRelease(newChord[0]) //, 
             //                             variable3/1000 , //duration in seconds
@@ -162,54 +167,65 @@
             }, variable3)
             beat()
 
-            beatPlayer.playbackRate = map(variable3,1000,10000,1,0.5)
+            beatPlayer.playbackRate = map(variable3,slider3.min,slider3.max,1,0.5)
+            beatPlayer.start()
+
             loop = new Tone.Loop((time) => {
-                // synth1.releaseAll(2)
-                beatPlayer.start(Tone.now(), "0", (variable3/1000) )
-                synth1.triggerAttackRelease(newChord[1], (variable3/1000) - 0.1, Tone.now())
-                // synth0.triggerAttackRelease(newChord[0], (variable3/1000) - 0.1)
-                console.log(time);
+                synth1.releaseAll()
+                // beatPlayer.start("0", "0", (variable3/1000) - 0.1 )
+                // synth1.triggerAttackRelease(newChord[1], (variable3/1000) - 0.1, Tone.now())
+                synth0.triggerAttackRelease(newChord[1], (variable3/1000) - 0.1, Tone.now() + 1)
+                synth2.stop()   
+                synth2.start("0", "0", (variable3/1000) - 0.1 )
+                console.log("beat");
             }, variable3/1000).start(0);
             Tone.Transport.start();
         }
 
         function windChanged() {
+            console.log("wind")
             dx *= -1
 
             slider4.value = Math.random() * 1000
             variable4 = slider.value
 
             // chorusLfoFreq = variable4/10 //og
-            chorusLfoFreq = map(variable4,1,1000,0,1.3)
+            chorusLfoFreq = map(variable4,slider4.min,slider4.max,0,1.3)
 
-            bgColorIndex = Math.floor(Math.random() * bgColors.length - 1)
+            bgColorIndex = Math.floor(Math.random() * bgColors.length - 0.1)
             synthNoteIndex++
 
             chorus.frequency.value = chorusLfoFreq //4
-            chorus.delayTime = map(variable3,1000,10000,1,6)  + Math.random()
+            chorus.delayTime = map(variable3,slider3.min,slider3.max,1,6)  + Math.random()
             // cd = Math.min( Math.random() * 2.5 * variable3 / 500, 4) // 2.5
             chorus.depth = map(Math.random(), -1,1, 0,4)// Math.random() * 0.9 //0.5
 
-            console.log( {depth: chorus.depth, delayTime:chorus.delayTime, frequency: chorus.frequency.value } )
+            synth2.reverse != synth2.reverse
+            synth2.playbackRate = map(variable3,slider3.min,slider3.max,1.5,0.5) + Math.random()
+
+            beatPlayer.playbackRate = map(variable3,slider3.min,slider3.max,1.5,0.5) + (Math.random()/50)
+
+            // console.log( {depth: chorus.depth, delayTime:chorus.delayTime, frequency: chorus.frequency.value } )
 
             if (bgColorIndex >= bgColors.length) bgColorIndex = 0
             if (synthNoteIndex >= synthNotes.length) synthNoteIndex = 0
 
             // psynth.releaseAll()
             
-            // slider var3     va de 1000 a 8000
-            // rango para dx iria de 10 a 1
-            v3m = map(variable3, 1000, 8000, 10, 1)
+            v3m = map(variable3, slider3.min,slider3.max, 10, 1)
             dx = v3m - (Math.random() * v3m*2)
             dy = v3m - (Math.random() * v3m*2)
-            // dy = 10 - (Math.random() * 20)
-            //solo por seguridad que tenga un valor operable
+            //solo por seguridad que tengan un valor operable
             if (dx < 1 && dx > -1) dx = 1.3
             if (dy < 1 && dy > -1) dy = 1.3
 
             // por si se pierde
             if (x > W+30 || x < -30) x = (W/2) + (Math.random()*W/4)
             if (y > H+30 || y < -30) y = (H/2) + (Math.random()*H/4)
+
+            // ctx.translate(0.5*Math.cos((i%7200)*Math.PI/180), 0.5*Math.sin((i%7200)*Math.PI/180))
+            // ctx.translate(W/2,H/2)
+            // ctx.rotate(Math.PI/180)
         }
 
         // from https://github.com/processing/p5.js/blob/b7815320e5e51a005fcc5a71cb0c9bf10553a008/src/math/calculation.js
@@ -225,7 +241,6 @@
                 return this.constrain(newval, stop2, start2);
             }
         }
-
         function constrain (n, low, high) {
             p5._validateParameters('constrain', arguments);
             return Math.max(Math.min(n, high), low);
@@ -236,16 +251,15 @@
         function draw() {
             i++;
 
-            ctx.fillStyle = bgColors[bgColorIndex]
-            if (i % 2 < 1) ctx.fillRect(0, 0, canvas.width, canvas.height)
+            // if (i % 2 < 1)
+                // ctx.translate(0.5*Math.cos((i%7200)*Math.PI/180), 0.5*Math.sin((i%7200)*Math.PI/180))
 
-            // sw = 4//(variable / 14) + 3
-            // sh = 4//(variable2 / 14) + 3
-            // xt = 1
-            // xt = Math.min(1, Math.abs(Math.tan(i/(variable2/5))))
-            xt = Math.cos(i/(variable2/30))
-            x += dx * xt * map(variable3,1000,10000,1.2,0.2)
-            y += dy * 1  * map(variable3,1000,10000,1.2,0.2)
+            ctx.fillStyle = bgColors[bgColorIndex]
+            if (i % 2 < 1) ctx.fillRect(-100, -100, W +200, H+200)
+
+            xt = Math.cos(i/(variable2/36))
+            x += dx * xt * map(variable3,slider3.min,slider3.max,1.2,0.2)
+            y += dy * 1  * map(variable3,slider3.min,slider3.max,1.2,0.2)
 
             if (x + CW > W || x - CW < 0 || y + CW > H || y - CW < 0) {
                 dy *= -1
@@ -253,7 +267,9 @@
             }
             // ctx.fillStyle = `rgba(${variable2/2},180,${variable/5},0.1)`
             // ctx.fillRect(x - sw / 2, y - sh / 2, sw, sh)
+
             
+
             // ctx.strokeStyle = "#0003"
             ctx.strokeStyle = `rgba(${variable2/2},${variable4<500?180:60},${variable/5},0.4)`
             // const dvd = String.fromCharCode(11799 + (Math.random() * i % 12))
@@ -296,9 +312,10 @@
         // const synth1 = new Tone.MembraneSynth().toDestination()
         const synth0 = new Tone.Sampler({urls:{A1:"lead11.wav"}})
         const synth1 = new Tone.Sampler({urls:{A0:"lead2.wav", A1:"lead11.wav"}})
-        // const synth2 = new Tone.Sampler({urls:{A1:"lead1.wav", A2:"lead2.wav"}})
+        const synth2 = new Tone.Player("lead11.wav")
 
-        const beatPlayer = new Tone.Player("beat1.wav")
+        const beatPlayer = new Tone.Player("loop_pads1.mp3")
+        // const beatPlayer = new Tone.Player("beat1.wav")
         
         
         // const chorus  = new Tone.Chorus(2, 2.5, 1)  
@@ -310,21 +327,29 @@
 
         chorus.wet.value=1  
         reverb.wet.value=1
-        reverb.output.a.gain.value = 1
+        reverb.output.a.gain.value = 0.9
         // filter.output.gain.value=2      
 
         // synth0.chain(chorus,  filter, Tone.Destination)
         synth0.chain(Tone.Destination)
-        synth1.chain(chorus, reverb, filter, Tone.Destination)
+        synth1.chain(chorus, filter, Tone.Destination)
         beatPlayer.chain(reverb, Tone.Destination)
+        synth2.chain(chorus, filter, Tone.Destination)
 
         const env = new Tone.AmplitudeEnvelope(0.1, .8, .9, 1)
         synth0.envelope = env
         synth1.envelope = env
+        synth2.envelope = env
         beatPlayer.envelope = env
+
+        beatPlayer.fadeOut = 1
+        beatPlayer.fadeIn  = 1
+        beatPlayer.loop    = true
 
         synth0.sync()
         synth1.sync()
+        // synth2.sync()
+        beatPlayer.sync()
         // Tone.Transport.start()
         
         // synth1.connect(new Tone.Multiply(-1))
@@ -336,6 +361,7 @@
         const startBtn = document.getElementById('start')
         startBtn.addEventListener('click', async () => {
             init()
+            ctx.translate(0,0)
             draw_interval = setInterval(draw, 100)
             slider3.disabled = true
             startBtn.disabled = true
