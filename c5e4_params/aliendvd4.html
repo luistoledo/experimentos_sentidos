@@ -44,7 +44,7 @@
             border: 30px double #ffffff11;
             /* border: double royalblue; */
             border-style: outset; 
-            box-shadow: #333 0px 3px 5px;
+            box-shadow: #333 0px 0px 5px;
             border-radius: 50%;
             /* border-radius: 1%; */
         }
@@ -259,7 +259,8 @@
             // if (x > W+30 || x < -30) x =  W4 - (Math.random()*W2)
             // if (y > H+30 || y < -30) y =  H4 - (Math.random()*H2)
 
-            canvasRndPatch()
+
+            if (i%5 < 1) canvasRndPatch()
 
             // rotate canvas
             for(j=0; j<=20; j++) {
@@ -321,7 +322,9 @@
             }
 
             ctx.strokeStyle = `rgba(${variable2/2},${variable4<500?180:60},${variable/5},0.4)`
-            const dvd = String.fromCharCode(11799 + (Math.random() * i % 12))
+            // const dvd = String.fromCharCode(11799 + (Math.random() * i % 12))
+            const legend = 'CoNtRol iLusión aUTomAtIon'
+            const dvd = legend[i % (legend.length-1)]
             ctx.strokeText(dvd, x, y)
             ctx.strokeText(dvd, y, x)
             ctx.strokeText(dvd, W-x, H-y)
